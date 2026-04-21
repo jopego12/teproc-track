@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f172a">
+<title>TEPROC · Reporte de Servicio</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --green: #10b981;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none; z-index: 0;
+  }
+
+  .app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 0 0 120px; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0f172a 0%, #1a2235 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 16px 14px;
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .logo {
+    font-family: var(--mono); font-size: 13px; color: var(--accent);
+    letter-spacing: 2px; text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+  .date-badge { font-family: var(--mono); font-size: 11px; color: var(--muted); background: var(--border); padding: 4px 10px; border-radius: 20px; }
+  .tech-row { display: flex; align-items: center; gap: 10px; }
+  .tech-row label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  select {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 8px 30px 8px 12px; border-radius: 8px;
+    font-family: var(--sans); font-size: 14px; font-weight: 500;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center; cursor: pointer;
+  }
+
+  /* STATS BAR */
+  .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
+  .stat { background: var(--surface); text-align: center; padding: 10px 4px; }
+  .stat-val { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--accent); }
+  .stat-val.green  { color: var(--green); }
+  .stat-val.orange { color: var(--orange); }
+  .stat-val.purple { color: #a78bfa; }
+  .stat-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+
+  /* SECTIONS */
+  .section { padding: 14px 14px 0; }
+
+  .section-title {
+    font-family: var(--mono); font-size: 11px; color: var(--accent);
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--border) 0%,transparent 100%); }
+
+  /* CARD */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+
+  /* FORMS */
+  .form-row { margin-bottom: 12px; }
+  .form-row:last-child { margin-bottom: 0; }
+  .form-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+  input[type="text"], input[type="number"], textarea {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 12px; border-radius: 8px;
+    font-family: var(--sans); font-size: 15px; transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,212,255,0.1); }
+  textarea { resize: none; min-height: 60px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* BUTTONS */
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 11px 14px; border-radius: 9px; font-family: var(--sans);
+    font-size: 13px; font-weight: 600; border: none; cursor: pointer;
+    transition: all 0.15s; width: 100%; letter-spacing: 0.2px;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), #0099cc); color: #0a0f1e; }
+  .btn-green   { background: linear-gradient(135deg, var(--green), #059669); color: white; }
+  .btn-ghost   { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-danger  { background: transparent; color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+  .btn-purple  { background: linear-gradient(135deg, var(--accent2), #5b21b6); color: white; }
+  .btn-send    { display:flex; align-items:center; justify-content:center; gap:8px; background: linear-gradient(135deg, var(--accent2), #5b21b6); color: white; padding: 15px; font-size: 15px; font-weight: 700; border-radius: 12px; letter-spacing: 0.4px; width:100%; border:none; cursor:pointer; }
+  .btn-row { display: flex; gap: 8px; }
+
+  /* VISIT CARD */
+  .visit-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; margin-bottom: 14px; overflow: hidden;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+  .visit-card.active-visit { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(0,212,255,0.15), 0 4px 20px rgba(0,212,255,0.07); }
+
+  .visit-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; cursor: pointer; background: var(--surface2); user-select: none;
+  }
+  .visit-header:active { background: var(--border); }
+  .visit-header-left { display: flex; align-items: center; gap: 10px; min-width: 0; flex:1; }
+  .visit-name { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .visit-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .visit-arrow { color: var(--muted); font-size: 11px; transition: transform 0.25s; flex-shrink: 0; margin-left: 8px; }
+  .visit-arrow.open { transform: rotate(180deg); }
+
+  .visit-summary {
+    display: flex; gap: 6px; padding: 8px 14px 10px; border-top: 1px solid var(--border);
+    flex-wrap: wrap; align-items: center;
+  }
+  .vchip {
+    font-family: var(--mono); font-size: 11px;
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 3px 8px; border-radius: 6px; color: var(--muted);
+    display: flex; align-items: center; gap: 3px;
+  }
+  .vchip b { color: var(--text); font-weight: 700; }
+
+  .visit-body { padding: 12px 14px 14px; border-top: 1px solid var(--border); }
+
+  /* EQUIP MINI LIST */
+  .equip-mini { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .equip-mini-item {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px;
+    animation: fadeIn 0.2s ease;
+  }
+  .emi-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .emi-num  { font-family: var(--mono); font-size: 10px; color: #a78bfa; background: rgba(124,58,237,0.1); padding: 2px 6px; border-radius: 4px; flex-shrink:0; }
+  .emi-name { font-size: 13px; font-weight: 600; color: var(--text); margin-left: 6px; }
+  .emi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
+  .emi-cell { text-align: center; }
+  .emi-label { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+  .emi-val   { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--text); margin-top: 1px; }
+  .emi-val.money { color: var(--green); }
+  .emi-val.time  { color: var(--orange); }
+  .emi-note { font-size: 11px; color: var(--muted); margin-top: 6px; font-style: italic; }
+  .del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 2px 4px; flex-shrink:0; }
+  .del-btn:hover { color: var(--red); }
+
+  /* ADD EQUIP FORM */
+  .add-equip-form {
+    background: rgba(0,212,255,0.04); border: 1px dashed rgba(0,212,255,0.2);
+    border-radius: 10px; padding: 12px; margin-bottom: 10px;
+    display: none;
+  }
+  .add-equip-form.open { display: block; animation: fadeIn 0.2s ease; }
+
+  /* MINI TIMER */
+  .mini-timer-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .mini-timer { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; }
+  .mini-timer.running { border-color: var(--green); background: rgba(16,185,129,0.07); }
+  .mini-timer-val { font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: 1px; }
+  .mini-timer-val.running { color: var(--green); }
+  .mini-timer-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+
+  /* TAGS */
+  .tag { display: inline-flex; align-items: center; gap: 3px; padding: 3px 7px; border-radius: 6px; font-size: 11px; font-weight: 600; font-family: var(--mono); }
+  .tag-blue   { background: rgba(0,212,255,0.12); color: var(--accent); border: 1px solid rgba(0,212,255,0.25); }
+  .tag-purple { background: rgba(124,58,237,0.12); color: #a78bfa; border: 1px solid rgba(124,58,237,0.25); }
+
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-active { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
+  .dot-closed { background: var(--muted); }
+
+  /* EMPTY */
+  .empty-state { text-align: center; padding: 28px 16px; color: var(--muted); }
+  .empty-icon  { font-size: 36px; margin-bottom: 8px; }
+  .empty-text  { font-size: 13px; line-height: 1.5; }
+
+  /* MODAL */
+  .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s; }
+  .modal-overlay.open { opacity:1;pointer-events:all; }
+  .modal { background:var(--surface);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:22px 18px 38px;width:100%;max-width:480px;transform:translateY(100%);transition:transform 0.32s cubic-bezier(0.34,1.56,0.64,1); }
+  .modal-overlay.open .modal { transform:translateY(0); }
+  .modal-handle { width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px; }
+  .modal-title  { font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px; }
+
+  /* SUCCESS */
+  .success-overlay { position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;opacity:0;pointer-events:none;transition:opacity 0.4s; }
+  .success-overlay.show { opacity:1;pointer-events:all; }
+  .success-icon  { font-size:60px;animation:bounceIn 0.5s ease; }
+  @keyframes bounceIn { 0%{transform:scale(0)} 70%{transform:scale(1.15)} 100%{transform:scale(1)} }
+  .success-title { font-family:var(--mono);font-size:20px;color:var(--green);letter-spacing:2px; }
+  .success-sub   { font-size:14px;color:var(--muted);text-align:center;max-width:280px;line-height:1.5; }
+
+  /* NOTICE */
+  .notice { background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);border-radius:10px;padding:11px 13px;font-size:12px;color:#c4b5fd;line-height:1.5;margin-bottom:14px; }
+  .notice strong { color:var(--accent2);display:block;margin-bottom:2px;font-size:10px;letter-spacing:1px;text-transform:uppercase; }
+
+  .sec-gap { padding-bottom: 14px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="logo"><div class="logo-dot"></div>TEPROC TRACK</div>
+      <div class="date-badge" id="dateDisplay"></div>
+    </div>
+    <div class="tech-row">
+      <label>Técnico:</label>
+      <select id="techSelect" onchange="updateTech()">
+        <option value="">— Seleccionar —</option>
+        <option>Mario Gutierrez</option>
+        <option>Andrés Perez</option>
+        <option>Breynner Palma</option>
+        <option>Jhonatan Perez</option>
+        <option>Otro</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-val purple" id="statVisitas">0</div><div class="stat-label">Visitas</div></div>
+    <div class="stat"><div class="stat-val" id="statEquipos">0</div><div class="stat-label">Equipos</div></div>
+    <div class="stat"><div class="stat-val orange" id="statTiempo">0h 0m</div><div class="stat-label">Tiempo</div></div>
+    <div class="stat"><div class="stat-val green" id="statCosto">$0</div><div class="stat-label">Costos</div></div>
+  </div>
+
+  <!-- NUEVA VISITA -->
+  <div class="section" style="padding-top:14px">
+    <div class="section-title">Nueva visita</div>
+    <div class="card">
+      <div class="form-row">
+        <label class="form-label">Cliente / Lugar</label>
+        <input type="text" id="vCliente" placeholder="Ej: Empresa XYZ — Sede Norte">
+      </div>
+      <div class="row2">
+        <div class="form-row" style="margin:0">
+          <label class="form-label">Tiempo de desplazamiento</label>
+          <input type="number" id="vMinDisp" placeholder="0" min="0">
+        </div>
+        <div class="form-row" style="margin:0">
+          <label class="form-label">Costo desplazamiento $</label>
+          <input type="number" id="vCostoDisp" placeholder="0" min="0">
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn btn-primary" onclick="createVisit()">📍 Crear visita y agregar equipos</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTA DE VISITAS -->
+  <div class="section sec-gap" id="visitSection" style="display:none">
+    <div class="section-title">
+      Visitas del día
+      <span class="tag tag-blue" id="visitCount">0</span>
+    </div>
+    <div id="visitList"></div>
+  </div>
+
+  <!-- ENVIAR -->
+  <div class="section" id="sendSection" style="display:none; padding-bottom:14px">
+    <div class="notice">
+      <strong>📤 Al enviar</strong>
+      Todas las visitas y equipos del día se registran en Google Sheets de golpe. Sin conflictos, sin archivos compartidos.
+    </div>
+    <button class="btn-send" onclick="sendReport()">📤 Enviar reporte del día</button>
+  </div>
+
+</div>
+
+<!-- MODAL CONFIRMAR -->
+<div class="modal-overlay" id="modalConfirm">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Confirmar envío</div>
+    <div id="modalBody" style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:18px"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeModal()" style="flex:1">Cancelar</button>
+      <button class="btn btn-purple" onclick="confirmSend()" style="flex:2">Confirmar y enviar</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-icon">✅</div>
+  <div class="success-title">¡ENVIADO!</div>
+  <div class="success-sub" id="successText"></div>
+  <button class="btn btn-ghost" onclick="resetAll()" style="margin-top:8px;width:200px">Nueva jornada</button>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+// visits[{ id, cliente, minDisp, costoDisp, hora, fecha, equipos:[], open:bool }]
+// equipos[{ id, nombre, minServ, costoRep, repuestos, obs }]
+let visits = [];
+let currentTech = '';
+let activeTimers = {}; // visitId -> { interval, elapsed, running }
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+(function(){
+  const now = new Date();
+  document.getElementById('dateDisplay').textContent =
+    now.toLocaleDateString('es-CO',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
+})();
+
+function updateTech(){ currentTech = document.getElementById('techSelect').value; }
+
+// ─── CREATE VISIT ─────────────────────────────────────────────────────────────
+function createVisit(){
+  const cliente = document.getElementById('vCliente').value.trim();
+  if(!cliente){ alert('Ingresa el nombre del cliente o lugar.'); return; }
+  if(!currentTech){ alert('Selecciona el técnico primero.'); return; }
+
+  const visit = {
+    id: Date.now(),
+    cliente,
+    minDisp: parseInt(document.getElementById('vMinDisp').value)||0,
+    costoDisp: parseFloat(document.getElementById('vCostoDisp').value)||0,
+    hora: new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}),
+    fecha: new Date().toLocaleDateString('es-CO'),
+    equipos: [],
+    open: true,
+  };
+
+  visits.push(visit);
+  document.getElementById('vCliente').value='';
+  document.getElementById('vMinDisp').value='';
+  document.getElementById('vCostoDisp').value='';
+
+  renderVisits();
+  updateStats();
+  showSections();
+
+  setTimeout(()=>{
+    const el = document.getElementById(`visit-${visit.id}`);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+    // auto-open equip form
+    toggleEquipForm(visit.id);
+  }, 150);
+}
+
+// ─── TOGGLE VISIT ─────────────────────────────────────────────────────────────
+function toggleVisit(id){
+  const v = visits.find(x=>x.id===id);
+  if(v) v.open = !v.open;
+  renderVisits();
+}
+
+// ─── DELETE VISIT ─────────────────────────────────────────────────────────────
+function deleteVisit(id){
+  if(!confirm('¿Eliminar esta visita y todos sus equipos?')) return;
+  visits = visits.filter(v=>v.id!==id);
+  if(activeTimers[id]){ clearInterval(activeTimers[id].interval); delete activeTimers[id]; }
+  renderVisits(); updateStats(); showSections();
+}
+
+// ─── TOGGLE EQUIP FORM ────────────────────────────────────────────────────────
+function toggleEquipForm(visitId){
+  const formEl = document.getElementById(`equip-form-${visitId}`);
+  if(!formEl) return;
+  const opening = !formEl.classList.contains('open');
+  formEl.classList.toggle('open', opening);
+  if(opening && !activeTimers[visitId]){
+    activeTimers[visitId] = { interval:null, elapsed:0, running:false };
+  }
+}
+
+// ─── TIMER ───────────────────────────────────────────────────────────────────
+function toggleEquipTimer(visitId){
+  const state = activeTimers[visitId];
+  if(!state) return;
+
+  if(state.running){
+    clearInterval(state.interval);
+    state.running = false;
+    _updateTimerUI(visitId, false);
+    syncTimerInput(visitId);
+  } else {
+    state.running = true;
+    const start = Date.now() - state.elapsed * 1000;
+    state.interval = setInterval(()=>{
+      state.elapsed = Math.floor((Date.now()-start)/1000);
+      updateTimerDisplay(visitId);
+      syncTimerInput(visitId);
+    }, 1000);
+    _updateTimerUI(visitId, true);
+  }
+}
+
+function _updateTimerUI(visitId, running){
+  const btn  = document.getElementById(`tbtn-${visitId}`);
+  const box  = document.getElementById(`tbox-${visitId}`);
+  const disp = document.getElementById(`tdisp-${visitId}`);
+  if(btn)  btn.textContent  = running ? '⏸ Pausar' : '▶ Reanudar';
+  if(box)  box.classList.toggle('running', running);
+  if(disp) disp.classList.toggle('running', running);
+}
+
+function updateTimerDisplay(visitId){
+  const s = activeTimers[visitId]?.elapsed || 0;
+  const h = Math.floor(s/3600).toString().padStart(2,'0');
+  const m = Math.floor((s%3600)/60).toString().padStart(2,'0');
+  const sec = (s%60).toString().padStart(2,'0');
+  const disp = document.getElementById(`tdisp-${visitId}`);
+  if(disp) disp.textContent = `${h}:${m}:${sec}`;
+}
+
+function syncTimerInput(visitId){
+  const mins = Math.floor((activeTimers[visitId]?.elapsed||0)/60);
+  const inp = document.getElementById(`eMinServ-${visitId}`);
+  if(inp) inp.value = mins;
+}
+
+function syncManualTimer(visitId){
+  const inp = document.getElementById(`eMinServ-${visitId}`);
+  const val = parseInt(inp?.value)||0;
+  if(activeTimers[visitId]) activeTimers[visitId].elapsed = val * 60;
+  updateTimerDisplay(visitId);
+}
+
+// ─── ADD EQUIPO ───────────────────────────────────────────────────────────────
+function addEquipoToVisit(visitId){
+  const v = visits.find(x=>x.id===visitId);
+  if(!v) return;
+
+  const nombre = document.getElementById(`eNombre-${visitId}`)?.value.trim();
+  if(!nombre){ alert('Ingresa el numero de informe.'); return; }
+
+  const state = activeTimers[visitId];
+  if(state?.running) toggleEquipTimer(visitId);
+
+  const minServ   = parseInt(document.getElementById(`eMinServ-${visitId}`)?.value)||Math.floor((state?.elapsed||0)/60);
+  const costoRep  = parseFloat(document.getElementById(`eCostoRep-${visitId}`)?.value)||0;
+  const repuestos = document.getElementById(`eRepuestos-${visitId}`)?.value.trim()||'';
+  const obs       = document.getElementById(`eObs-${visitId}`)?.value.trim()||'';
+
+  v.equipos.push({ id:Date.now(), nombre, minServ, costoRep, repuestos, obs });
+
+  // reset timer
+  if(activeTimers[visitId]){ clearInterval(activeTimers[visitId].interval); activeTimers[visitId] = { interval:null, elapsed:0, running:false }; }
+
+  renderVisits();
+  updateStats();
+
+  // re-open form and clear for next equip
+  const formEl = document.getElementById(`equip-form-${visitId}`);
+  if(formEl){
+    formEl.classList.add('open');
+    ['eNombre','eMinServ','eCostoRep','eRepuestos','eObs'].forEach(p=>{
+      const el = document.getElementById(`${p}-${visitId}`);
+      if(el) el.value='';
+    });
+    const tdisp = document.getElementById(`tdisp-${visitId}`);
+    if(tdisp){ tdisp.textContent='00:00:00'; tdisp.classList.remove('running'); }
+    const tbox = document.getElementById(`tbox-${visitId}`);
+    if(tbox) tbox.classList.remove('running');
+    const tbtn = document.getElementById(`tbtn-${visitId}`);
+    if(tbtn) tbtn.textContent='▶ Iniciar';
+  }
+}
+
+// ─── DELETE EQUIPO ────────────────────────────────────────────────────────────
+function deleteEquipo(visitId, equipId){
+  if(!confirm('¿Eliminar este equipo?')) return;
+  const v = visits.find(x=>x.id===visitId);
+  if(v) v.equipos = v.equipos.filter(e=>e.id!==equipId);
+  renderVisits(); updateStats();
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderVisits(){
+  const list = document.getElementById('visitList');
+  document.getElementById('visitCount').textContent = visits.length;
+
+  if(visits.length===0){
+    list.innerHTML=`<div class="empty-state"><div class="empty-icon">📍</div><div class="empty-text">Crea tu primera visita arriba.</div></div>`;
+    return;
+  }
+
+  list.innerHTML = visits.map((v,vi)=>{
+    const totalMinServ = v.equipos.reduce((a,e)=>a+e.minServ,0);
+    const totalCostoRep = v.equipos.reduce((a,e)=>a+e.costoRep,0);
+    const totalCosto = totalCostoRep + v.costoDisp;
+    const state = activeTimers[v.id] || {elapsed:0,running:false};
+    const s = state.elapsed;
+    const th=Math.floor(s/3600).toString().padStart(2,'0');
+    const tm=Math.floor((s%3600)/60).toString().padStart(2,'0');
+    const tsec=(s%60).toString().padStart(2,'0');
+    const isFormOpen = !!document.getElementById(`equip-form-${v.id}`)?.classList.contains('open');
+
+    return `
+    <div class="visit-card ${v.open?'active-visit':''}" id="visit-${v.id}">
+
+      <!-- HEADER -->
+      <div class="visit-header" onclick="toggleVisit(${v.id})">
+        <div class="visit-header-left">
+          <div class="status-dot ${v.open?'dot-active':'dot-closed'}"></div>
+          <div style="min-width:0">
+            <div class="visit-name">${v.cliente}</div>
+            <div class="visit-sub">${v.hora} · ${v.equipos.length} equipo${v.equipos.length!==1?'s':''}</div>
+          </div>
+        </div>
+        <span class="tag tag-purple">${v.equipos.length} eq.</span>
+        <span class="visit-arrow ${v.open?'open':''}">▼</span>
+      </div>
+
+      <!-- SUMMARY -->
+      <div class="visit-summary">
+        <div class="vchip">⚙ <b>${totalMinServ}m</b></div>
+        <div class="vchip">🚗 <b>${v.minDisp}m</b></div>
+        <div class="vchip">💰 <b>$${totalCosto.toLocaleString()}</b></div>
+        <div style="margin-left:auto">
+          <button class="btn btn-danger" style="padding:4px 10px;font-size:11px;width:auto" onclick="event.stopPropagation();deleteVisit(${v.id})">🗑 Eliminar</button>
+        </div>
+      </div>
+
+      <!-- BODY -->
+      ${v.open ? `
+      <div class="visit-body">
+
+        ${v.equipos.length>0 ? `
+        <div class="equip-mini">
+          ${v.equipos.map((e,ei)=>`
+          <div class="equip-mini-item">
+            <div class="emi-header">
+              <div style="display:flex;align-items:center;min-width:0">
+                <div class="emi-num">#${ei+1}</div>
+                <div class="emi-name">${e.nombre}</div>
+              </div>
+              <button class="del-btn" onclick="deleteEquipo(${v.id},${e.id})">✕</button>
+            </div>
+            <div class="emi-grid">
+              <div class="emi-cell">
+                <div class="emi-label">Servicio</div>
+                <div class="emi-val time">${e.minServ}m</div>
+              </div>
+              <div class="emi-cell">
+                <div class="emi-label">Repuestos</div>
+                <div class="emi-val money">$${e.costoRep.toLocaleString()}</div>
+              </div>
+              <div class="emi-cell" style="grid-column:span 2">
+                <div class="emi-label">Materiales</div>
+                <div class="emi-val" style="font-size:11px;color:var(--muted);font-family:var(--sans);text-align:left">${e.repuestos||'—'}</div>
+              </div>
+            </div>
+            ${e.obs?`<div class="emi-note">📝 ${e.obs}</div>`:''}
+          </div>
+          `).join('')}
+        </div>
+        ` : `<div style="text-align:center;color:var(--muted);font-size:12px;padding:6px 0 12px">Sin equipos aún — agrega el primero ↓</div>`}
+
+        <!-- FORM AGREGAR EQUIPO -->
+        <div class="add-equip-form ${isFormOpen?'open':''}" id="equip-form-${v.id}">
+          <div style="font-family:var(--mono);font-size:10px;color:rgba(0,212,255,0.7);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">
+            + Equipo #${v.equipos.length+1}
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Numero de informe</label>
+            <input type="text" id="eNombre-${v.id}" placeholder="Ej: PC escritorio, Impresora HP...">
+          </div>
+
+          <div style="margin-bottom:10px">
+            <label class="form-label">Cronómetro de servicio</label>
+            <div class="mini-timer-row">
+              <div class="mini-timer" id="tbox-${v.id}">
+                <div class="mini-timer-val" id="tdisp-${v.id}">${th}:${tm}:${tsec}</div>
+                <div class="mini-timer-lbl">⚙ tiempo servicio</div>
+              </div>
+              <button class="btn btn-green" id="tbtn-${v.id}"
+                onclick="toggleEquipTimer(${v.id})" style="font-size:12px">
+                ${state.running?'⏸ Pausar':'▶ Iniciar'}
+              </button>
+            </div>
+          </div>
+
+          <div class="row2" style="margin-bottom:10px">
+            <div>
+              <label class="form-label">tiempo de servicio (minutos)</label>
+              <input type="number" id="eMinServ-${v.id}" placeholder="0" min="0" oninput="syncManualTimer(${v.id})">
+            </div>
+            <div>
+              <label class="form-label">Costo repuestos $</label>
+              <input type="number" id="eCostoRep-${v.id}" placeholder="0" min="0">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Repuestos / materiales</label>
+            <input type="text" id="eRepuestos-${v.id}" placeholder="Tóner HP 85A, cable USB...">
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Observaciones</label>
+            <textarea id="eObs-${v.id}" placeholder="Estado, pendientes, notas..."></textarea>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="toggleEquipForm(${v.id})" style="flex:1">Cancelar</button>
+            <button class="btn btn-primary" onclick="addEquipoToVisit(${v.id})" style="flex:2">✔ Guardar equipo</button>
+          </div>
+        </div>
+
+        <!-- BOTÓN AGREGAR EQUIPO -->
+        <button class="btn btn-green" onclick="toggleEquipForm(${v.id})">
+          + Agregar equipo a esta visita
+        </button>
+
+      </div>
+      ` : ''}
+    </div>
+    `;
+  }).reverse().join('');
+}
+
+// ─── STATS ────────────────────────────────────────────────────────────────────
+function updateStats(){
+  let totalEquipos=0, totalMins=0, totalCosto=0;
+  visits.forEach(v=>{
+    totalEquipos += v.equipos.length;
+    totalMins += v.minDisp + v.equipos.reduce((a,e)=>a+e.minServ,0);
+    totalCosto += v.costoDisp + v.equipos.reduce((a,e)=>a+e.costoRep,0);
+  });
+  document.getElementById('statVisitas').textContent = visits.length;
+  document.getElementById('statEquipos').textContent = totalEquipos;
+  const h=Math.floor(totalMins/60), m=totalMins%60;
+  document.getElementById('statTiempo').textContent = `${h}h ${m}m`;
+  document.getElementById('statCosto').textContent = `$${totalCosto.toLocaleString()}`;
+}
+
+function showSections(){
+  const show = visits.length > 0;
+  document.getElementById('visitSection').style.display = show ? 'block' : 'none';
+  document.getElementById('sendSection').style.display  = show ? 'block' : 'none';
+}
+
+// ─── SEND ─────────────────────────────────────────────────────────────────────
+function sendReport(){
+  if(!currentTech){ alert('Selecciona tu nombre primero.'); return; }
+  if(visits.length===0){ alert('Agrega al menos una visita.'); return; }
+
+  const totalEquipos = visits.reduce((a,v)=>a+v.equipos.length,0);
+  const totalMins = visits.reduce((a,v)=>a+v.minDisp+v.equipos.reduce((b,e)=>b+e.minServ,0),0);
+  const totalCosto = visits.reduce((a,v)=>a+v.costoDisp+v.equipos.reduce((b,e)=>b+e.costoRep,0),0);
+  const h=Math.floor(totalMins/60), m=totalMins%60;
+
+  document.getElementById('modalBody').innerHTML=`
+    <strong style="color:var(--text);font-size:15px">${currentTech}</strong><br><br>
+    📍 <strong>${visits.length} visita${visits.length!==1?'s':''}</strong> con <strong>${totalEquipos} equipo${totalEquipos!==1?'s':''}</strong> en total<br>
+    ⏱ Tiempo total: <strong style="color:var(--orange)">${h}h ${m}m</strong><br>
+    💰 Costo total: <strong style="color:var(--green)">$${totalCosto.toLocaleString()}</strong><br><br>
+    ¿Confirmas el envío a Google Sheets?
+  `;
+  document.getElementById('modalConfirm').classList.add('open');
+}
+
+function closeModal(){ document.getElementById('modalConfirm').classList.remove('open'); }
+
+async function confirmSend(){
+  closeModal();
+
+  // ═══════════════════════════════════════════════
+  // REEMPLAZA CON TU URL DE GOOGLE APPS SCRIPT
+  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyoNHW8AiYYrCA4NG0chAcdEpypAUXFVbAPyjZv6AYlmUONWdjzT2nuFHecg-_aohzw/exec';
+  // ═══════════════════════════════════════════════
+
+  // Una fila por equipo con datos de la visita padre incluidos
+  const payload = [];
+  visits.forEach(v=>{
+    const base = { tecnico:currentTech, fecha:v.fecha, hora:v.hora, cliente:v.cliente, visita_min_desplaz:v.minDisp, visita_costo_desplaz:v.costoDisp };
+    if(v.equipos.length===0){
+      payload.push({...base, equipo:'(sin equipo)', min_servicio:0, costo_repuestos:0, repuestos:'', observaciones:''});
+    } else {
+      v.equipos.forEach(e=>{
+        payload.push({...base, equipo:e.nombre, min_servicio:e.minServ, costo_repuestos:e.costoRep, repuestos:e.repuestos, observaciones:e.obs});
+      });
+    }
+  });
+
+  const isDemoMode = SHEETS_URL.includes('TU_ID_AQUI');
+  if(isDemoMode){
+    await new Promise(r=>setTimeout(r,1200));
+    showSuccess(payload.length, true);
+    return;
+  }
+
+  try{
+    await fetch(SHEETS_URL,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'application/json'},mode:'no-cors'});
+    showSuccess(payload.length, false);
+  } catch(err){
+    alert('Error de conexión. Verifica tu internet e intenta de nuevo.');
+  }
+}
+
+function showSuccess(count, demo){
+  document.getElementById('successText').innerHTML =
+    `${count} registro${count!==1?'s':''} enviado${count!==1?'s':''} correctamente a Google Sheets.`+
+    (demo?'<br><small style="opacity:0.5;margin-top:6px;display:block">(Modo demo — configura la URL de Apps Script)</small>':'');
+  document.getElementById('successOverlay').classList.add('show');
+}
+
+function resetAll(){
+  Object.values(activeTimers).forEach(s=>{ if(s.interval) clearInterval(s.interval); });
+  activeTimers={}; visits=[]; currentTech='';
+  document.getElementById('techSelect').value='';
+  document.getElementById('successOverlay').classList.remove('show');
+  renderVisits(); updateStats(); showSections();
+}
+
+document.getElementById('modalConfirm').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js")
+    .then(() => console.log("SW registrado"))
+    .catch(err => console.log("SW error", err));
+}
+</script>
+</body>
+</html>
