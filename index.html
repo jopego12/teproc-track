@@ -76,6 +76,27 @@
     background-repeat: no-repeat; background-position: right 10px center; cursor: pointer;
   }
 
+  /* OFFLINE BANNER */
+  .offline-banner {
+    background: rgba(245,158,11,0.12);
+    border-bottom: 1px solid rgba(245,158,11,0.3);
+    padding: 8px 14px;
+    font-size: 12px;
+    color: var(--orange);
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono);
+    letter-spacing: 0.5px;
+  }
+  .offline-banner.hidden { display: none; }
+  .pending-badge {
+    margin-left: auto;
+    background: rgba(245,158,11,0.2);
+    border: 1px solid rgba(245,158,11,0.4);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+  }
+
   /* STATS BAR */
   .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
   .stat { background: var(--surface); text-align: center; padding: 10px 4px; }
@@ -110,6 +131,22 @@
   input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,212,255,0.1); }
   textarea { resize: none; min-height: 60px; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* GEO PILL */
+  .geo-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25);
+    border-radius: 8px; padding: 7px 10px; margin-top: 10px;
+    font-size: 11px; color: #6ee7b7; font-family: var(--mono);
+    cursor: pointer; transition: background 0.2s;
+  }
+  .geo-pill:active { background: rgba(16,185,129,0.15); }
+  .geo-pill.loading { color: var(--muted); border-color: var(--border); }
+  .geo-pill.error { color: var(--orange); border-color: rgba(245,158,11,0.25); background: rgba(245,158,11,0.06); }
+  .geo-dot { width:7px; height:7px; border-radius:50%; background:var(--green); flex-shrink:0; }
+  .geo-dot.loading { background: var(--muted); animation: pulse 1s infinite; }
+  .geo-dot.error { background: var(--orange); }
 
   /* BUTTONS */
   .btn {
@@ -124,6 +161,7 @@
   .btn-ghost   { background: transparent; color: var(--muted); border: 1px solid var(--border); }
   .btn-danger  { background: transparent; color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
   .btn-purple  { background: linear-gradient(135deg, var(--accent2), #5b21b6); color: white; }
+  .btn-orange  { background: linear-gradient(135deg, var(--orange), #d97706); color: #0a0f1e; }
   .btn-send    { display:flex; align-items:center; justify-content:center; gap:8px; background: linear-gradient(135deg, var(--accent2), #5b21b6); color: white; padding: 15px; font-size: 15px; font-weight: 700; border-radius: 12px; letter-spacing: 0.4px; width:100%; border:none; cursor:pointer; }
   .btn-row { display: flex; gap: 8px; }
 
@@ -161,6 +199,14 @@
 
   .visit-body { padding: 12px 14px 14px; border-top: 1px solid var(--border); }
 
+  /* GEO INFO BOX */
+  .geo-info-box {
+    background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 8px; padding: 7px 10px; margin-bottom: 12px;
+    font-size: 11px; color: #6ee7b7; font-family: var(--mono);
+    display: flex; align-items: center; gap: 6px;
+  }
+
   /* EQUIP MINI LIST */
   .equip-mini { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
   .equip-mini-item {
@@ -177,6 +223,7 @@
   .emi-val   { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--text); margin-top: 1px; }
   .emi-val.money { color: var(--green); }
   .emi-val.time  { color: var(--orange); }
+  .emi-val.search { color: #a78bfa; }
   .emi-note { font-size: 11px; color: var(--muted); margin-top: 6px; font-style: italic; }
   .del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 2px 4px; flex-shrink:0; }
   .del-btn:hover { color: var(--red); }
@@ -231,6 +278,15 @@
   .notice { background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);border-radius:10px;padding:11px 13px;font-size:12px;color:#c4b5fd;line-height:1.5;margin-bottom:14px; }
   .notice strong { color:var(--accent2);display:block;margin-bottom:2px;font-size:10px;letter-spacing:1px;text-transform:uppercase; }
 
+  /* PENDING QUEUE */
+  .pending-notice {
+    background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25);
+    border-radius: 10px; padding: 11px 13px; font-size: 12px; color: #fcd34d;
+    line-height: 1.5; margin-bottom: 14px; display:none;
+  }
+  .pending-notice.show { display: block; }
+  .pending-notice strong { color: var(--orange); display:block; margin-bottom:2px; font-size:10px; letter-spacing:1px; text-transform:uppercase; }
+
   .sec-gap { padding-bottom: 14px; }
 </style>
 </head>
@@ -256,6 +312,13 @@
     </div>
   </div>
 
+  <!-- OFFLINE BANNER -->
+  <div class="offline-banner hidden" id="offlineBanner">
+    <span>📡</span>
+    <span>Sin conexión — datos guardados localmente</span>
+    <span class="pending-badge" id="pendingCount"></span>
+  </div>
+
   <!-- STATS -->
   <div class="stats-bar">
     <div class="stat"><div class="stat-val purple" id="statVisitas">0</div><div class="stat-label">Visitas</div></div>
@@ -274,13 +337,18 @@
       </div>
       <div class="row2">
         <div class="form-row" style="margin:0">
-          <label class="form-label">Tiempo de desplazamiento</label>
+          <label class="form-label">Tiempo de desplazamiento (min)</label>
           <input type="number" id="vMinDisp" placeholder="0" min="0">
         </div>
         <div class="form-row" style="margin:0">
           <label class="form-label">Costo desplazamiento $</label>
           <input type="number" id="vCostoDisp" placeholder="0" min="0">
         </div>
+      </div>
+      <!-- GEO BUTTON -->
+      <div class="geo-pill loading" id="geoPill" onclick="retryGeo()">
+        <div class="geo-dot loading" id="geoDot"></div>
+        <span id="geoText">Obteniendo ubicación...</span>
       </div>
       <div style="margin-top:12px">
         <button class="btn btn-primary" onclick="createVisit()">📍 Crear visita y agregar equipos</button>
@@ -299,9 +367,14 @@
 
   <!-- ENVIAR -->
   <div class="section" id="sendSection" style="display:none; padding-bottom:14px">
+    <!-- PENDING OFFLINE NOTICE -->
+    <div class="pending-notice" id="pendingNotice">
+      <strong>⏳ Reportes pendientes</strong>
+      Hay reportes guardados sin enviar. Al presionar "Enviar", se incluirán junto al reporte actual.
+    </div>
     <div class="notice">
       <strong>📤 Al enviar</strong>
-      Todas las visitas y equipos del día se registran en Google Sheets de golpe. Sin conflictos, sin archivos compartidos.
+      Todas las visitas y equipos del día se registran en Google Sheets. Si no hay señal, se guarda y envía automáticamente cuando vuelva la conexión.
     </div>
     <button class="btn-send" onclick="sendReport()">📤 Enviar reporte del día</button>
   </div>
@@ -330,23 +403,196 @@
 </div>
 
 <script>
-// ─── STATE ───────────────────────────────────────────────────────────────────
-// visits[{ id, cliente, minDisp, costoDisp, hora, fecha, equipos:[], open:bool }]
-// equipos[{ id, nombre, minServ, costoRep, repuestos, obs }]
+// ════════════════════════════════════════════════════════════════════
+// CONFIGURACIÓN
+// ════════════════════════════════════════════════════════════════════
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyoNHW8AiYYrCA4NG0chAcdEpypAUXFVbAPyjZv6AYlmUONWdjzT2nuFHecg-_aohzw/exec';
+const STORAGE_KEY   = 'teproc_visits';
+const TECH_KEY      = 'teproc_tech';
+const PENDING_KEY   = 'teproc_pending'; // cola de reportes sin enviar
+
+// ════════════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════════════
 let visits = [];
 let currentTech = '';
-let activeTimers = {}; // visitId -> { interval, elapsed, running }
+let activeTimers = {};
+let currentGeo = null; // { lat, lng, accuracy, address }
+let isOnline = navigator.onLine;
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+// PERSISTENCIA LOCAL
+// ════════════════════════════════════════════════════════════════════
+function saveLocal() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visits));
+    localStorage.setItem(TECH_KEY, currentTech);
+  } catch(e) { console.warn('LocalStorage error:', e); }
+}
+
+function loadLocal() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const tech  = localStorage.getItem(TECH_KEY);
+    if (saved) {
+      visits = JSON.parse(saved);
+      // Reconstruir timers vacíos para visitas cargadas
+      visits.forEach(v => {
+        if (!activeTimers[v.id]) activeTimers[v.id] = { interval:null, elapsed:0, running:false };
+      });
+    }
+    if (tech) {
+      currentTech = tech;
+      document.getElementById('techSelect').value = tech;
+    }
+  } catch(e) { console.warn('Error cargando datos locales:', e); }
+}
+
+function getPendingQueue() {
+  try { return JSON.parse(localStorage.getItem(PENDING_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+
+function savePendingQueue(queue) {
+  try { localStorage.setItem(PENDING_KEY, JSON.stringify(queue)); }
+  catch(e) { console.warn('Error guardando cola pendiente:', e); }
+}
+
+function clearPendingQueue() {
+  localStorage.removeItem(PENDING_KEY);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CONEXIÓN / OFFLINE
+// ════════════════════════════════════════════════════════════════════
+function updateOnlineStatus() {
+  isOnline = navigator.onLine;
+  const banner = document.getElementById('offlineBanner');
+  const queue  = getPendingQueue();
+
+  if (!isOnline) {
+    banner.classList.remove('hidden');
+    document.getElementById('pendingCount').textContent =
+      queue.length > 0 ? `${queue.length} pendiente${queue.length!==1?'s':''}` : '';
+  } else {
+    banner.classList.add('hidden');
+    // Intentar enviar cola pendiente
+    if (queue.length > 0) flushPendingQueue();
+  }
+  updatePendingNotice();
+}
+
+function updatePendingNotice() {
+  const queue = getPendingQueue();
+  const notice = document.getElementById('pendingNotice');
+  if (notice) notice.classList.toggle('show', queue.length > 0 && isOnline);
+}
+
+async function flushPendingQueue() {
+  const queue = getPendingQueue();
+  if (queue.length === 0) return;
+  if (!isOnline) return;
+
+  try {
+    for (const batch of queue) {
+      await fetch(SHEETS_URL, {
+        method: 'POST',
+        body: JSON.stringify(batch),
+        headers: { 'Content-Type': 'application/json' },
+        mode: 'no-cors'
+      });
+    }
+    clearPendingQueue();
+    updatePendingNotice();
+    showToast('📤 Reportes pendientes enviados automáticamente');
+  } catch(e) {
+    console.warn('Error enviando cola pendiente:', e);
+  }
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = `
+    position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+    background:#1a2235;border:1px solid var(--green);color:#6ee7b7;
+    padding:10px 18px;border-radius:10px;font-size:12px;font-family:var(--mono);
+    z-index:400;animation:fadeIn 0.3s ease;box-shadow:0 4px 20px rgba(0,0,0,0.4);
+    white-space:nowrap;
+  `;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+window.addEventListener('online',  updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+// ════════════════════════════════════════════════════════════════════
+// GEOLOCALIZACIÓN
+// ════════════════════════════════════════════════════════════════════
+function initGeo() {
+  if (!navigator.geolocation) {
+    setGeoState('error', '📡 Geolocalización no disponible');
+    return;
+  }
+  setGeoState('loading', 'Obteniendo ubicación...');
+  navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, {
+    enableHighAccuracy: true, timeout: 12000, maximumAge: 60000
+  });
+}
+
+function retryGeo() {
+  currentGeo = null;
+  initGeo();
+}
+
+function onGeoSuccess(pos) {
+  currentGeo = {
+    lat: pos.coords.latitude.toFixed(6),
+    lng: pos.coords.longitude.toFixed(6),
+    accuracy: Math.round(pos.coords.accuracy)
+  };
+  setGeoState('ok', `📍 ${currentGeo.lat}, ${currentGeo.lng} (±${currentGeo.accuracy}m)`);
+}
+
+function onGeoError(err) {
+  currentGeo = null;
+  const msgs = { 1:'Permiso denegado', 2:'Posición no disponible', 3:'Tiempo de espera agotado' };
+  setGeoState('error', `⚠ ${msgs[err.code]||'Error GPS'} — toca para reintentar`);
+}
+
+function setGeoState(state, text) {
+  const pill = document.getElementById('geoPill');
+  const dot  = document.getElementById('geoDot');
+  const txt  = document.getElementById('geoText');
+  pill.className = `geo-pill ${state==='ok'?'':''}${state==='loading'?'loading':''}${state==='error'?'error':''}`;
+  dot.className  = `geo-dot ${state==='ok'?'':''}${state==='loading'?'loading':''}${state==='error'?'error':''}`;
+  txt.textContent = text;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════════
 (function(){
   const now = new Date();
   document.getElementById('dateDisplay').textContent =
     now.toLocaleDateString('es-CO',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
+  loadLocal();
+  initGeo();
+  updateOnlineStatus();
+  renderVisits();
+  updateStats();
+  showSections();
 })();
 
-function updateTech(){ currentTech = document.getElementById('techSelect').value; }
+function updateTech() {
+  currentTech = document.getElementById('techSelect').value;
+  saveLocal();
+}
 
-// ─── CREATE VISIT ─────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+// CREATE VISIT
+// ════════════════════════════════════════════════════════════════════
 function createVisit(){
   const cliente = document.getElementById('vCliente').value.trim();
   if(!cliente){ alert('Ingresa el nombre del cliente o lugar.'); return; }
@@ -359,6 +605,7 @@ function createVisit(){
     costoDisp: parseFloat(document.getElementById('vCostoDisp').value)||0,
     hora: new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}),
     fecha: new Date().toLocaleDateString('es-CO'),
+    geo: currentGeo ? { ...currentGeo } : null,
     equipos: [],
     open: true,
   };
@@ -368,6 +615,10 @@ function createVisit(){
   document.getElementById('vMinDisp').value='';
   document.getElementById('vCostoDisp').value='';
 
+  // Refrescar geo para la próxima visita
+  initGeo();
+
+  saveLocal();
   renderVisits();
   updateStats();
   showSections();
@@ -375,27 +626,31 @@ function createVisit(){
   setTimeout(()=>{
     const el = document.getElementById(`visit-${visit.id}`);
     if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
-    // auto-open equip form
     toggleEquipForm(visit.id);
   }, 150);
 }
 
-// ─── TOGGLE VISIT ─────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+// TOGGLE / DELETE VISIT
+// ════════════════════════════════════════════════════════════════════
 function toggleVisit(id){
   const v = visits.find(x=>x.id===id);
   if(v) v.open = !v.open;
+  saveLocal();
   renderVisits();
 }
 
-// ─── DELETE VISIT ─────────────────────────────────────────────────────────────
 function deleteVisit(id){
   if(!confirm('¿Eliminar esta visita y todos sus equipos?')) return;
   visits = visits.filter(v=>v.id!==id);
   if(activeTimers[id]){ clearInterval(activeTimers[id].interval); delete activeTimers[id]; }
+  saveLocal();
   renderVisits(); updateStats(); showSections();
 }
 
-// ─── TOGGLE EQUIP FORM ────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+// TOGGLE EQUIP FORM
+// ════════════════════════════════════════════════════════════════════
 function toggleEquipForm(visitId){
   const formEl = document.getElementById(`equip-form-${visitId}`);
   if(!formEl) return;
@@ -406,7 +661,9 @@ function toggleEquipForm(visitId){
   }
 }
 
-// ─── TIMER ───────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+// TIMER
+// ════════════════════════════════════════════════════════════════════
 function toggleEquipTimer(visitId){
   const state = activeTimers[visitId];
   if(!state) return;
@@ -459,7 +716,9 @@ function syncManualTimer(visitId){
   updateTimerDisplay(visitId);
 }
 
-// ─── ADD EQUIPO ───────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+// ADD EQUIPO
+// ════════════════════════════════════════════════════════════════════
 function addEquipoToVisit(visitId){
   const v = visits.find(x=>x.id===visitId);
   if(!v) return;
@@ -470,16 +729,18 @@ function addEquipoToVisit(visitId){
   const state = activeTimers[visitId];
   if(state?.running) toggleEquipTimer(visitId);
 
-  const minServ   = parseInt(document.getElementById(`eMinServ-${visitId}`)?.value)||Math.floor((state?.elapsed||0)/60);
-  const costoRep  = parseFloat(document.getElementById(`eCostoRep-${visitId}`)?.value)||0;
-  const repuestos = document.getElementById(`eRepuestos-${visitId}`)?.value.trim()||'';
-  const obs       = document.getElementById(`eObs-${visitId}`)?.value.trim()||'';
+  const minServ     = parseInt(document.getElementById(`eMinServ-${visitId}`)?.value)||Math.floor((state?.elapsed||0)/60);
+  const costoRep    = parseFloat(document.getElementById(`eCostoRep-${visitId}`)?.value)||0;
+  const costoBusq   = parseFloat(document.getElementById(`eCostoBusq-${visitId}`)?.value)||0;
+  const repuestos   = document.getElementById(`eRepuestos-${visitId}`)?.value.trim()||'';
+  const obs         = document.getElementById(`eObs-${visitId}`)?.value.trim()||'';
 
-  v.equipos.push({ id:Date.now(), nombre, minServ, costoRep, repuestos, obs });
+  v.equipos.push({ id:Date.now(), nombre, minServ, costoRep, costoBusq, repuestos, obs });
 
   // reset timer
   if(activeTimers[visitId]){ clearInterval(activeTimers[visitId].interval); activeTimers[visitId] = { interval:null, elapsed:0, running:false }; }
 
+  saveLocal();
   renderVisits();
   updateStats();
 
@@ -487,7 +748,7 @@ function addEquipoToVisit(visitId){
   const formEl = document.getElementById(`equip-form-${visitId}`);
   if(formEl){
     formEl.classList.add('open');
-    ['eNombre','eMinServ','eCostoRep','eRepuestos','eObs'].forEach(p=>{
+    ['eNombre','eMinServ','eCostoRep','eCostoBusq','eRepuestos','eObs'].forEach(p=>{
       const el = document.getElementById(`${p}-${visitId}`);
       if(el) el.value='';
     });
@@ -500,15 +761,20 @@ function addEquipoToVisit(visitId){
   }
 }
 
-// ─── DELETE EQUIPO ────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+// DELETE EQUIPO
+// ════════════════════════════════════════════════════════════════════
 function deleteEquipo(visitId, equipId){
   if(!confirm('¿Eliminar este equipo?')) return;
   const v = visits.find(x=>x.id===visitId);
   if(v) v.equipos = v.equipos.filter(e=>e.id!==equipId);
+  saveLocal();
   renderVisits(); updateStats();
 }
 
-// ─── RENDER ───────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════════════════════════
 function renderVisits(){
   const list = document.getElementById('visitList');
   document.getElementById('visitCount').textContent = visits.length;
@@ -518,10 +784,11 @@ function renderVisits(){
     return;
   }
 
-  list.innerHTML = visits.map((v,vi)=>{
-    const totalMinServ = v.equipos.reduce((a,e)=>a+e.minServ,0);
+  list.innerHTML = visits.map((v)=>{
+    const totalMinServ  = v.equipos.reduce((a,e)=>a+e.minServ,0);
     const totalCostoRep = v.equipos.reduce((a,e)=>a+e.costoRep,0);
-    const totalCosto = totalCostoRep + v.costoDisp;
+    const totalBusq     = v.equipos.reduce((a,e)=>a+(e.costoBusq||0),0);
+    const totalCosto    = totalCostoRep + totalBusq + v.costoDisp;
     const state = activeTimers[v.id] || {elapsed:0,running:false};
     const s = state.elapsed;
     const th=Math.floor(s/3600).toString().padStart(2,'0');
@@ -538,7 +805,7 @@ function renderVisits(){
           <div class="status-dot ${v.open?'dot-active':'dot-closed'}"></div>
           <div style="min-width:0">
             <div class="visit-name">${v.cliente}</div>
-            <div class="visit-sub">${v.hora} · ${v.equipos.length} equipo${v.equipos.length!==1?'s':''}</div>
+            <div class="visit-sub">${v.hora} · ${v.equipos.length} equipo${v.equipos.length!==1?'s':''}${v.geo?` · 📍`:''}</div>
           </div>
         </div>
         <span class="tag tag-purple">${v.equipos.length} eq.</span>
@@ -559,6 +826,14 @@ function renderVisits(){
       ${v.open ? `
       <div class="visit-body">
 
+        <!-- GEO INFO -->
+        ${v.geo ? `
+        <div class="geo-info-box">
+          <span>📍</span>
+          <span>${v.geo.lat}, ${v.geo.lng} &nbsp;·&nbsp; ±${v.geo.accuracy}m</span>
+        </div>
+        ` : ''}
+
         ${v.equipos.length>0 ? `
         <div class="equip-mini">
           ${v.equipos.map((e,ei)=>`
@@ -570,7 +845,7 @@ function renderVisits(){
               </div>
               <button class="del-btn" onclick="deleteEquipo(${v.id},${e.id})">✕</button>
             </div>
-            <div class="emi-grid">
+            <div class="emi-grid" style="grid-template-columns:repeat(4,1fr)">
               <div class="emi-cell">
                 <div class="emi-label">Servicio</div>
                 <div class="emi-val time">${e.minServ}m</div>
@@ -579,9 +854,13 @@ function renderVisits(){
                 <div class="emi-label">Repuestos</div>
                 <div class="emi-val money">$${e.costoRep.toLocaleString()}</div>
               </div>
-              <div class="emi-cell" style="grid-column:span 2">
+              <div class="emi-cell">
+                <div class="emi-label">Búsqueda</div>
+                <div class="emi-val search">$${(e.costoBusq||0).toLocaleString()}</div>
+              </div>
+              <div class="emi-cell">
                 <div class="emi-label">Materiales</div>
-                <div class="emi-val" style="font-size:11px;color:var(--muted);font-family:var(--sans);text-align:left">${e.repuestos||'—'}</div>
+                <div class="emi-val" style="font-size:10px;color:var(--muted);font-family:var(--sans)">${e.repuestos||'—'}</div>
               </div>
             </div>
             ${e.obs?`<div class="emi-note">📝 ${e.obs}</div>`:''}
@@ -615,14 +894,18 @@ function renderVisits(){
             </div>
           </div>
 
-          <div class="row2" style="margin-bottom:10px">
+          <div class="row3" style="margin-bottom:10px">
             <div>
-              <label class="form-label">tiempo de servicio (minutos)</label>
+              <label class="form-label">Tiempo servicio (min)</label>
               <input type="number" id="eMinServ-${v.id}" placeholder="0" min="0" oninput="syncManualTimer(${v.id})">
             </div>
             <div>
               <label class="form-label">Costo repuestos $</label>
               <input type="number" id="eCostoRep-${v.id}" placeholder="0" min="0">
+            </div>
+            <div>
+              <label class="form-label">Tiempo búsqueda (min)</label>
+              <input type="number" id="eCostoBusq-${v.id}" placeholder="0" min="0">
             </div>
           </div>
 
@@ -654,13 +937,17 @@ function renderVisits(){
   }).reverse().join('');
 }
 
-// ─── STATS ────────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+// STATS
+// ════════════════════════════════════════════════════════════════════
 function updateStats(){
   let totalEquipos=0, totalMins=0, totalCosto=0;
   visits.forEach(v=>{
     totalEquipos += v.equipos.length;
     totalMins += v.minDisp + v.equipos.reduce((a,e)=>a+e.minServ,0);
-    totalCosto += v.costoDisp + v.equipos.reduce((a,e)=>a+e.costoRep,0);
+    totalCosto += v.costoDisp
+      + v.equipos.reduce((a,e)=>a+e.costoRep,0)
+      + v.equipos.reduce((a,e)=>a+(e.costoBusq||0),0);
   });
   document.getElementById('statVisitas').textContent = visits.length;
   document.getElementById('statEquipos').textContent = totalEquipos;
@@ -673,24 +960,66 @@ function showSections(){
   const show = visits.length > 0;
   document.getElementById('visitSection').style.display = show ? 'block' : 'none';
   document.getElementById('sendSection').style.display  = show ? 'block' : 'none';
+  updatePendingNotice();
 }
 
-// ─── SEND ─────────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+// BUILD PAYLOAD
+// ════════════════════════════════════════════════════════════════════
+function buildPayload(visitsData, tech) {
+  const payload = [];
+  visitsData.forEach(v => {
+    const base = {
+      tecnico: tech,
+      fecha: v.fecha,
+      hora: v.hora,
+      cliente: v.cliente,
+      visita_min_desplaz: v.minDisp,
+      visita_costo_desplaz: v.costoDisp,
+      geo_lat: v.geo ? v.geo.lat : '',
+      geo_lng: v.geo ? v.geo.lng : '',
+      geo_precision: v.geo ? v.geo.accuracy : ''
+    };
+    if(v.equipos.length===0){
+      payload.push({...base, equipo:'(sin equipo)', min_servicio:0, costo_repuestos:0, tiempo_busqueda:0, repuestos:'', observaciones:''});
+    } else {
+      v.equipos.forEach(e=>{
+        payload.push({...base,
+          equipo: e.nombre,
+          min_servicio: e.minServ,
+          costo_repuestos: e.costoRep,
+          tiempo_busqueda: e.costoBusq||0,
+          repuestos: e.repuestos,
+          observaciones: e.obs
+        });
+      });
+    }
+  });
+  return payload;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SEND
+// ════════════════════════════════════════════════════════════════════
 function sendReport(){
   if(!currentTech){ alert('Selecciona tu nombre primero.'); return; }
   if(visits.length===0){ alert('Agrega al menos una visita.'); return; }
 
   const totalEquipos = visits.reduce((a,v)=>a+v.equipos.length,0);
   const totalMins = visits.reduce((a,v)=>a+v.minDisp+v.equipos.reduce((b,e)=>b+e.minServ,0),0);
-  const totalCosto = visits.reduce((a,v)=>a+v.costoDisp+v.equipos.reduce((b,e)=>b+e.costoRep,0),0);
+  const totalCosto = visits.reduce((a,v)=>a+v.costoDisp
+    +v.equipos.reduce((b,e)=>b+e.costoRep,0)
+    +v.equipos.reduce((b,e)=>b+(e.costoBusq||0),0),0);
   const h=Math.floor(totalMins/60), m=totalMins%60;
+  const pendingQueue = getPendingQueue();
 
   document.getElementById('modalBody').innerHTML=`
     <strong style="color:var(--text);font-size:15px">${currentTech}</strong><br><br>
     📍 <strong>${visits.length} visita${visits.length!==1?'s':''}</strong> con <strong>${totalEquipos} equipo${totalEquipos!==1?'s':''}</strong> en total<br>
     ⏱ Tiempo total: <strong style="color:var(--orange)">${h}h ${m}m</strong><br>
-    💰 Costo total: <strong style="color:var(--green)">$${totalCosto.toLocaleString()}</strong><br><br>
-    ¿Confirmas el envío a Google Sheets?
+    💰 Costo total: <strong style="color:var(--green)">$${totalCosto.toLocaleString()}</strong><br>
+    ${pendingQueue.length>0 ? `<br>⏳ <strong style="color:var(--orange)">${pendingQueue.length} reporte${pendingQueue.length!==1?'s':''} pendiente${pendingQueue.length!==1?'s':''}</strong> también se enviarán.<br>`:''}
+    <br>¿Confirmas el envío a Google Sheets?
   `;
   document.getElementById('modalConfirm').classList.add('open');
 }
@@ -700,40 +1029,56 @@ function closeModal(){ document.getElementById('modalConfirm').classList.remove(
 async function confirmSend(){
   closeModal();
 
-  // ═══════════════════════════════════════════════
-  // REEMPLAZA CON TU URL DE GOOGLE APPS SCRIPT
-  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyoNHW8AiYYrCA4NG0chAcdEpypAUXFVbAPyjZv6AYlmUONWdjzT2nuFHecg-_aohzw/exec';
-  // ═══════════════════════════════════════════════
-
-  // Una fila por equipo con datos de la visita padre incluidos
-  const payload = [];
-  visits.forEach(v=>{
-    const base = { tecnico:currentTech, fecha:v.fecha, hora:v.hora, cliente:v.cliente, visita_min_desplaz:v.minDisp, visita_costo_desplaz:v.costoDisp };
-    if(v.equipos.length===0){
-      payload.push({...base, equipo:'(sin equipo)', min_servicio:0, costo_repuestos:0, repuestos:'', observaciones:''});
-    } else {
-      v.equipos.forEach(e=>{
-        payload.push({...base, equipo:e.nombre, min_servicio:e.minServ, costo_repuestos:e.costoRep, repuestos:e.repuestos, observaciones:e.obs});
-      });
-    }
-  });
-
+  const payload = buildPayload(visits, currentTech);
   const isDemoMode = SHEETS_URL.includes('TU_ID_AQUI');
-  if(isDemoMode){
+
+  if (isDemoMode) {
     await new Promise(r=>setTimeout(r,1200));
     showSuccess(payload.length, true);
     return;
   }
 
-  try{
-    await fetch(SHEETS_URL,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'application/json'},mode:'no-cors'});
+  if (!isOnline) {
+    // Guardar en cola pendiente
+    const queue = getPendingQueue();
+    queue.push(payload);
+    savePendingQueue(queue);
+    updateOnlineStatus();
+    showOfflineSaved(payload.length);
+    return;
+  }
+
+  try {
+    // Enviar cola pendiente + reporte actual
+    const pendingQueue = getPendingQueue();
+    for (const batch of pendingQueue) {
+      await fetch(SHEETS_URL, { method:'POST', body:JSON.stringify(batch), headers:{'Content-Type':'application/json'}, mode:'no-cors' });
+    }
+    clearPendingQueue();
+
+    await fetch(SHEETS_URL, { method:'POST', body:JSON.stringify(payload), headers:{'Content-Type':'application/json'}, mode:'no-cors' });
     showSuccess(payload.length, false);
-  } catch(err){
-    alert('Error de conexión. Verifica tu internet e intenta de nuevo.');
+  } catch(err) {
+    // Sin conexión aunque navigator.onLine decía true → guardar en cola
+    const queue = getPendingQueue();
+    queue.push(payload);
+    savePendingQueue(queue);
+    showOfflineSaved(payload.length);
   }
 }
 
+function showOfflineSaved(count) {
+  document.getElementById('successText').innerHTML =
+    `${count} registro${count!==1?'s':''} guardado${count!==1?'s':''} localmente.<br>
+    <small style="opacity:0.7;margin-top:6px;display:block">Se enviarán automáticamente cuando haya señal 📡</small>`;
+  document.getElementById('successOverlay').classList.add('show');
+  document.querySelector('.success-title').textContent = '¡GUARDADO!';
+  document.querySelector('.success-icon').textContent = '💾';
+}
+
 function showSuccess(count, demo){
+  document.querySelector('.success-title').textContent = '¡ENVIADO!';
+  document.querySelector('.success-icon').textContent = '✅';
   document.getElementById('successText').innerHTML =
     `${count} registro${count!==1?'s':''} enviado${count!==1?'s':''} correctamente a Google Sheets.`+
     (demo?'<br><small style="opacity:0.5;margin-top:6px;display:block">(Modo demo — configura la URL de Apps Script)</small>':'');
@@ -745,6 +1090,8 @@ function resetAll(){
   activeTimers={}; visits=[]; currentTech='';
   document.getElementById('techSelect').value='';
   document.getElementById('successOverlay').classList.remove('show');
+  saveLocal();
+  initGeo();
   renderVisits(); updateStats(); showSections();
 }
 
