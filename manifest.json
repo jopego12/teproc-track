@@ -1,11 +1,10 @@
 {
   "name": "Teproc Track",
-  "short_name": "Teproc Track",
-  "start_url": ".",
+  "short_name": "Teproc",
+  "start_url": "/teproc-track/",
   "display": "standalone",
   "background_color": "#0a0f1e",
   "theme_color": "#0f172a",
-  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
