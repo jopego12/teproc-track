@@ -316,14 +316,18 @@
 
         <div class="row2" style="margin-bottom:12px">
           <div>
-            <label class="form-label">Chat ID responsable *</label>
-            <input type="text" id="rChatId" placeholder="Ej: 123456789">
+            <label class="form-label">Responsable *</label>
+<select id="rChatId">
+  <option value="JP">JP - Jhonatan</option>
+  <option value="MA">MA - Manuel</option>
+</select>
           </div>
           <div>
-            <label class="form-label">Chat ID asignado por</label>
-            <input type="text" id="rAsignadoPor" placeholder="Dejar vacío = mismo">
-          </div>
-        </div>
+          <label class="form-label">Asignado por</label>
+<select id="rAsignadoPor">
+  <option value="JP">JP - Jhonatan</option>
+  <option value="MA">MA - Manuel</option>
+</select>
 
         <button class="btn btn-orange" onclick="enviarRecordatorio()">🔔 Guardar y notificar por Telegram</button>
       </div>
@@ -440,7 +444,7 @@
 //  CONFIGURACIÓN — Reemplaza con tus URLs reales de Apps Script
 // ═══════════════════════════════════════════════════════════════
 const URL_REPORTES       = 'https://script.google.com/macros/s/AKfycbyoNHW8AiYYrCA4NG0chAcdEpypAUXFVbAPyjZv6AYlmUONWdjzT2nuFHecg-_aohzw/exec';
-const URL_LUNA           = 'https://script.google.com/macros/s/AKfycbwPRUqnusMLuOKF8fDfkHVwXJa9kHUHCuMjEZY5Bm2h80UEVmGpAK1yeHY8D2Z9QGPN/exec';  // ← tu Apps Script de recordatorios/oportunidades
+const URL_LUNA           = 'https://script.google.com/macros/s/AKfycbyK66JuuTIOjugwIQWfWNQFerRL1iNULFTWNsy_KBE_CuhCxhlNuH4ffLVaIskI4fKl/exec';  // ← tu Apps Script de recordatorios/oportunidades
 
 // ═══════════════════════════════════════════════════════════════
 //  STATE
