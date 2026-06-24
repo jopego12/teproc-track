@@ -1,4 +1,422 @@
-<div class="modal">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f172a">
+<title>TEPROC · TRACK</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1e; --surface: #111827; --surface2: #1a2235;
+    --border: #1e2d45; --accent: #00d4ff; --accent2: #7c3aed;
+    --green: #10b981; --orange: #f59e0b; --red: #ef4444;
+    --yellow: #eab308; --text: #e2e8f0; --muted: #64748b;
+    --mono: 'Space Mono', monospace; --sans: 'DM Sans', sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100dvh; overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image: linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px), linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px); background-size:32px 32px; pointer-events:none; z-index:0; }
+  .app { position:relative; z-index:1; max-width:480px; margin:0 auto; padding:0 0 140px; }
+
+  /* ── HEADER ── */
+  .header { background:linear-gradient(135deg,#0f172a 0%,#1a2235 100%); border-bottom:1px solid var(--border); padding:18px 16px 0; position:sticky; top:0; z-index:100; backdrop-filter:blur(12px); }
+  .header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .logo { font-family:var(--mono); font-size:13px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; display:flex; align-items:center; gap:8px; }
+  .logo-dot { width:8px; height:8px; background:var(--accent); border-radius:50%; animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+  .date-badge { font-family:var(--mono); font-size:11px; color:var(--muted); background:var(--border); padding:4px 10px; border-radius:20px; }
+  .tech-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .tech-row label { font-size:12px; color:var(--muted); white-space:nowrap; }
+  select { flex:1; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:8px 30px 8px 12px; border-radius:8px; font-family:var(--sans); font-size:14px; font-weight:500; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; cursor:pointer; }
+
+  /* ── TAB NAV ── */
+  .tab-nav { display:flex; gap:1px; background:var(--border); }
+  .tab-btn { flex:1; padding:10px 4px; background:var(--surface); font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); border:none; cursor:pointer; transition:all 0.2s; }
+  .tab-btn.active { color:var(--accent); background:var(--surface2); border-top:2px solid var(--accent); }
+  .tab-btn:active { opacity:0.7; }
+
+  /* ── STATS ── */
+  .stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border-bottom:1px solid var(--border); }
+  .stat { background:var(--surface); text-align:center; padding:10px 4px; }
+  .stat-val { font-family:var(--mono); font-size:15px; font-weight:700; color:var(--accent); }
+  .stat-val.green{color:var(--green)} .stat-val.orange{color:var(--orange)} .stat-val.purple{color:#a78bfa} .stat-val.yellow{color:var(--yellow)}
+  .stat-label { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:0.4px; margin-top:2px; }
+
+  /* ── SECTIONS ── */
+  .section { padding:14px 14px 0; }
+  .section-title { font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .section-title::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,var(--border) 0%,transparent 100%); }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:12px; }
+
+  /* ── FORMS ── */
+  .form-row { margin-bottom:12px; }
+  .form-row:last-child { margin-bottom:0; }
+  .form-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:5px; display:block; }
+  input[type="text"],input[type="number"],input[type="datetime-local"],input[type="date"],textarea {
+    width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text);
+    padding:10px 12px; border-radius:8px; font-family:var(--sans); font-size:15px; transition:border-color 0.2s;
+  }
+  input[type="datetime-local"],input[type="date"] { color-scheme:dark; }
+  input:focus,textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 2px rgba(0,212,255,0.1); }
+  textarea { resize:none; min-height:60px; }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+
+  /* ── BUTTONS ── */
+  .btn { display:flex; align-items:center; justify-content:center; gap:6px; padding:11px 14px; border-radius:9px; font-family:var(--sans); font-size:13px; font-weight:600; border:none; cursor:pointer; transition:all 0.15s; width:100%; letter-spacing:0.2px; }
+  .btn:active { transform:scale(0.97); }
+  .btn-primary { background:linear-gradient(135deg,var(--accent),#0099cc); color:#0a0f1e; }
+  .btn-green   { background:linear-gradient(135deg,var(--green),#059669); color:white; }
+  .btn-ghost   { background:transparent; color:var(--muted); border:1px solid var(--border); }
+  .btn-danger  { background:transparent; color:var(--red); border:1px solid rgba(239,68,68,0.3); }
+  .btn-purple  { background:linear-gradient(135deg,var(--accent2),#5b21b6); color:white; }
+  .btn-orange  { background:linear-gradient(135deg,var(--orange),#d97706); color:white; }
+  .btn-yellow  { background:linear-gradient(135deg,var(--yellow),#ca8a04); color:#0a0f1e; }
+  .btn-send    { display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg,var(--accent2),#5b21b6); color:white; padding:15px; font-size:15px; font-weight:700; border-radius:12px; letter-spacing:0.4px; width:100%; border:none; cursor:pointer; }
+  .btn-row { display:flex; gap:8px; }
+
+  /* ── VISIT CARDS ── */
+  .visit-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; margin-bottom:14px; overflow:hidden; animation:fadeIn 0.3s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+  .visit-card.active-visit { border-color:var(--accent); box-shadow:0 0 0 1px rgba(0,212,255,0.15),0 4px 20px rgba(0,212,255,0.07); }
+  .visit-header { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; cursor:pointer; background:var(--surface2); user-select:none; }
+  .visit-header:active { background:var(--border); }
+  .visit-header-left { display:flex; align-items:center; gap:10px; min-width:0; flex:1; }
+  .visit-name { font-size:14px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .visit-sub  { font-size:11px; color:var(--muted); margin-top:1px; }
+  .visit-arrow { color:var(--muted); font-size:11px; transition:transform 0.25s; flex-shrink:0; margin-left:8px; }
+  .visit-arrow.open { transform:rotate(180deg); }
+  .visit-summary { display:flex; gap:6px; padding:8px 14px 10px; border-top:1px solid var(--border); flex-wrap:wrap; align-items:center; }
+  .vchip { font-family:var(--mono); font-size:11px; background:var(--surface2); border:1px solid var(--border); padding:3px 8px; border-radius:6px; color:var(--muted); display:flex; align-items:center; gap:3px; }
+  .vchip b { color:var(--text); font-weight:700; }
+  .visit-body { padding:12px 14px 14px; border-top:1px solid var(--border); }
+
+  /* ── EQUIP MINI ── */
+  .equip-mini { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+  .equip-mini-item { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:10px 12px; animation:fadeIn 0.2s ease; }
+  .emi-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .emi-num  { font-family:var(--mono); font-size:10px; color:#a78bfa; background:rgba(124,58,237,0.1); padding:2px 6px; border-radius:4px; flex-shrink:0; }
+  .emi-name { font-size:13px; font-weight:600; color:var(--text); margin-left:6px; }
+  .emi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  .emi-cell { text-align:center; }
+  .emi-label { font-size:9px; color:var(--muted); text-transform:uppercase; }
+  .emi-val   { font-family:var(--mono); font-size:12px; font-weight:700; color:var(--text); margin-top:1px; }
+  .emi-val.money{color:var(--green)} .emi-val.time{color:var(--orange)}
+  .emi-note { font-size:11px; color:var(--muted); margin-top:6px; font-style:italic; }
+  .del-btn { background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:2px 4px; flex-shrink:0; }
+  .del-btn:hover { color:var(--red); }
+
+  /* ── ADD EQUIP FORM ── */
+  .add-equip-form { background:rgba(0,212,255,0.04); border:1px dashed rgba(0,212,255,0.2); border-radius:10px; padding:12px; margin-bottom:10px; display:none; }
+  .add-equip-form.open { display:block; animation:fadeIn 0.2s ease; }
+
+  /* ── MINI TIMER ── */
+  .mini-timer-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+  .mini-timer { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px; text-align:center; }
+  .mini-timer.running { border-color:var(--green); background:rgba(16,185,129,0.07); }
+  .mini-timer-val { font-family:var(--mono); font-size:16px; font-weight:700; color:var(--text); letter-spacing:1px; }
+  .mini-timer-val.running { color:var(--green); }
+  .mini-timer-lbl { font-size:9px; color:var(--muted); text-transform:uppercase; margin-top:2px; }
+
+  /* ── TAGS ── */
+  .tag { display:inline-flex; align-items:center; gap:3px; padding:3px 7px; border-radius:6px; font-size:11px; font-weight:600; font-family:var(--mono); }
+  .tag-blue   { background:rgba(0,212,255,0.12); color:var(--accent); border:1px solid rgba(0,212,255,0.25); }
+  .tag-purple { background:rgba(124,58,237,0.12); color:#a78bfa; border:1px solid rgba(124,58,237,0.25); }
+  .tag-green  { background:rgba(16,185,129,0.12); color:var(--green); border:1px solid rgba(16,185,129,0.25); }
+  .tag-orange { background:rgba(245,158,11,0.12); color:var(--orange); border:1px solid rgba(245,158,11,0.25); }
+  .tag-red    { background:rgba(239,68,68,0.12); color:var(--red); border:1px solid rgba(239,68,68,0.25); }
+
+  .status-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .dot-active { background:var(--green); box-shadow:0 0 6px var(--green); animation:pulse 2s infinite; }
+  .dot-closed { background:var(--muted); }
+  .dot-orange { background:var(--orange); box-shadow:0 0 6px var(--orange); }
+  .dot-yellow { background:var(--yellow); }
+
+  /* ── PENDIENTE / OPO CARDS ── */
+  .item-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:10px; animation:fadeIn 0.3s ease; }
+  .item-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:6px; }
+  .item-title { font-size:14px; font-weight:600; color:var(--text); line-height:1.35; }
+  .item-meta  { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; align-items:center; }
+  .item-chip  { font-family:var(--mono); font-size:10px; color:var(--muted); background:var(--surface2); border:1px solid var(--border); padding:2px 7px; border-radius:5px; }
+  .item-chip.urg { color:var(--orange); border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.06); }
+  .item-chip.alta{ color:var(--yellow); border-color:rgba(234,179,8,0.3); background:rgba(234,179,8,0.06); }
+  .item-chip.ok  { color:var(--green); border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.06); }
+  .seq-badge { font-family:var(--mono); font-size:12px; font-weight:700; color:var(--accent2); background:rgba(124,58,237,0.12); border:1px solid rgba(124,58,237,0.25); padding:2px 8px; border-radius:6px; white-space:nowrap; flex-shrink:0; }
+
+  /* ── EMPTY ── */
+  .empty-state { text-align:center; padding:28px 16px; color:var(--muted); }
+  .empty-icon  { font-size:36px; margin-bottom:8px; }
+  .empty-text  { font-size:13px; line-height:1.5; }
+
+  /* ── MODAL ── */
+  .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s; }
+  .modal-overlay.open { opacity:1;pointer-events:all; }
+  .modal { background:var(--surface);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:22px 18px 38px;width:100%;max-width:480px;transform:translateY(100%);transition:transform 0.32s cubic-bezier(0.34,1.56,0.64,1); }
+  .modal-overlay.open .modal { transform:translateY(0); }
+  .modal-handle { width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px; }
+  .modal-title  { font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px; }
+
+  /* ── SUCCESS ── */
+  .success-overlay { position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;opacity:0;pointer-events:none;transition:opacity 0.4s; }
+  .success-overlay.show { opacity:1;pointer-events:all; }
+  .success-icon  { font-size:60px;animation:bounceIn 0.5s ease; }
+  @keyframes bounceIn { 0%{transform:scale(0)} 70%{transform:scale(1.15)} 100%{transform:scale(1)} }
+  .success-title { font-family:var(--mono);font-size:20px;color:var(--green);letter-spacing:2px; }
+  .success-sub   { font-size:14px;color:var(--muted);text-align:center;max-width:280px;line-height:1.5; }
+
+  /* ── NOTICE ── */
+  .notice { background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);border-radius:10px;padding:11px 13px;font-size:12px;color:#c4b5fd;line-height:1.5;margin-bottom:14px; }
+  .notice strong { color:var(--accent2);display:block;margin-bottom:2px;font-size:10px;letter-spacing:1px;text-transform:uppercase; }
+  .notice-warn { background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.25);color:#fcd34d; }
+  .notice-warn strong { color:var(--orange); }
+
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+  .sec-gap { padding-bottom:14px; }
+
+  /* ── SPINNER ── */
+  .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="logo"><div class="logo-dot"></div>TEPROC TRACK</div>
+      <div class="date-badge" id="dateDisplay"></div>
+    </div>
+    <div class="tech-row">
+      <label>Técnico:</label>
+      <select id="techSelect" onchange="updateTech()">
+        <option value="">— Seleccionar —</option>
+        <option>Mario Gutierrez</option>
+        <option>Andrés Perez</option>
+        <option>Breynner Palma</option>
+        <option>Jhonatan Perez</option>
+        <option>Otro</option>
+      </select>
+    </div>
+    <!-- TAB NAV -->
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('reportes')">📋 Reportes</button>
+      <button class="tab-btn" onclick="switchTab('recordatorios')">🔔 Recordatorios</button>
+      <button class="tab-btn" onclick="switchTab('oportunidades')">📈 Oportunidades</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!--  TAB 1 — REPORTES                                           -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div id="tab-reportes" class="tab-panel active">
+    <!-- STATS -->
+    <div class="stats-bar">
+      <div class="stat"><div class="stat-val purple" id="statVisitas">0</div><div class="stat-label">Visitas</div></div>
+      <div class="stat"><div class="stat-val" id="statEquipos">0</div><div class="stat-label">Equipos</div></div>
+      <div class="stat"><div class="stat-val orange" id="statTiempo">0h 0m</div><div class="stat-label">Tiempo</div></div>
+      <div class="stat"><div class="stat-val green" id="statCosto">$0</div><div class="stat-label">Costos</div></div>
+    </div>
+
+    <div class="section" style="padding-top:14px">
+      <div class="section-title">Nueva visita</div>
+      <div class="card">
+        <div class="form-row">
+          <label class="form-label">Cliente / Lugar</label>
+          <input type="text" id="vCliente" placeholder="Ej: Laboratorio XYZ">
+        </div>
+        <div class="row2">
+          <div class="form-row" style="margin:0">
+            <label class="form-label">Desplazamiento (min)</label>
+            <input type="number" id="vMinDisp" placeholder="0" min="0">
+          </div>
+          <div class="form-row" style="margin:0">
+            <label class="form-label">Costo desplazamiento $</label>
+            <input type="number" id="vCostoDisp" placeholder="0" min="0">
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <button class="btn btn-primary" onclick="createVisit()">📍 Crear visita y agregar equipos</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section sec-gap" id="visitSection" style="display:none">
+      <div class="section-title">Visitas del día <span class="tag tag-blue" id="visitCount">0</span></div>
+      <div id="visitList"></div>
+    </div>
+
+    <div class="section" id="sendSection" style="display:none; padding-bottom:14px">
+      <div class="notice">
+        <strong>📤 Al enviar</strong>
+        Todas las visitas y equipos del día se registran en Google Sheets de golpe.
+      </div>
+      <button class="btn-send" onclick="sendReport()">📤 Enviar reporte del día</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!--  TAB 2 — RECORDATORIOS                                      -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div id="tab-recordatorios" class="tab-panel">
+    <div class="stats-bar">
+      <div class="stat"><div class="stat-val yellow" id="rStatTotal">0</div><div class="stat-label">Creados hoy</div></div>
+      <div class="stat"><div class="stat-val orange" id="rStatPend">0</div><div class="stat-label">Pendientes</div></div>
+      <div class="stat"><div class="stat-val green" id="rStatOk">0</div><div class="stat-label">Completados</div></div>
+      <div class="stat"><div class="stat-val" id="rStatCat">—</div><div class="stat-label">Última cat.</div></div>
+    </div>
+
+    <div class="section" style="padding-top:14px">
+      <div class="section-title">Nuevo recordatorio</div>
+
+      <div class="notice notice-warn" id="rChatWarn" style="display:none">
+        <strong>⚠ Chat ID requerido</strong>
+        Necesitas un Chat ID de Telegram para recibir la alerta. Envía /start al bot para obtenerlo.
+      </div>
+
+      <div class="card">
+        <div class="form-row">
+          <label class="form-label">Descripción / Tarea *</label>
+          <textarea id="rPendiente" placeholder="Ej: Llamar a cliente Fluke para confirmar entrega" rows="2"></textarea>
+        </div>
+
+        <div class="row2">
+          <div class="form-row" style="margin:0">
+            <label class="form-label">Fecha y hora *</label>
+            <input type="datetime-local" id="rFechaHora">
+          </div>
+          <div class="form-row" style="margin:0">
+            <label class="form-label">Prioridad</label>
+            <select id="rPrioridad">
+              <option value="Normal">Normal</option>
+              <option value="Alta">Alta ⚡</option>
+              <option value="Urgente">Urgente 🚨</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top:12px">
+          <label class="form-label">Categoría</label>
+          <select id="rCategoria">
+            <option value="">— Sin categoría —</option>
+            <option value="Licitacion">📄 Licitación</option>
+            <option value="Cotizacion">🟡 Cotización</option>
+            <option value="Contrato">📑 Contrato</option>
+            <option value="Servicio">🛠 Servicio</option>
+            <option value="Tecnico">🔧 Técnico</option>
+            <option value="Administrativo">📋 Administrativo</option>
+            <option value="Personal">👤 Personal</option>
+          </select>
+        </div>
+
+        <div class="row2" style="margin-bottom:12px">
+          <div>
+            <label class="form-label">Chat ID responsable *</label>
+            <input type="text" id="rChatId" placeholder="Ej: 123456789">
+          </div>
+          <div>
+            <label class="form-label">Chat ID asignado por</label>
+            <input type="text" id="rAsignadoPor" placeholder="Dejar vacío = mismo">
+          </div>
+        </div>
+
+        <button class="btn btn-orange" onclick="enviarRecordatorio()">🔔 Guardar y notificar por Telegram</button>
+      </div>
+    </div>
+
+    <!-- Lista de recordatorios guardados hoy (locales) -->
+    <div class="section sec-gap" id="rListSection" style="display:none">
+      <div class="section-title">Guardados esta sesión <span class="tag tag-orange" id="rCount">0</span></div>
+      <div id="rList"></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <!--  TAB 3 — OPORTUNIDADES                                      -->
+  <!-- ════════════════════════════════════════════════════════════ -->
+  <div id="tab-oportunidades" class="tab-panel">
+    <div class="stats-bar">
+      <div class="stat"><div class="stat-val purple" id="oStatTotal">0</div><div class="stat-label">Registradas</div></div>
+      <div class="stat"><div class="stat-val green" id="oStatValor">$0</div><div class="stat-label">Valor total</div></div>
+      <div class="stat"><div class="stat-val orange" id="oStatSesion">0</div><div class="stat-label">Esta sesión</div></div>
+      <div class="stat"><div class="stat-val yellow" id="oStatSeq">—</div><div class="stat-label">Último cód.</div></div>
+    </div>
+
+    <div class="section" style="padding-top:14px">
+      <div class="section-title">Nueva oportunidad</div>
+      <div class="card">
+
+        <div class="row2">
+          <div class="form-row" style="margin:0">
+            <label class="form-label">Tipo *</label>
+            <select id="oTipo">
+              <option value="">— Seleccionar —</option>
+              <option value="VENTA">💼 Venta</option>
+              <option value="REPUESTO">🔩 Repuesto</option>
+              <option value="SERVICIO">🛠 Servicio</option>
+              <option value="LICITACION">📄 Licitación</option>
+              <option value="CONTRATO">📑 Contrato</option>
+              <option value="PROYECTO">🚀 Proyecto</option>
+              <option value="OTRO">📌 Otro</option>
+            </select>
+          </div>
+          <div class="form-row" style="margin:0">
+            <label class="form-label">Secuencia (auto)</label>
+            <input type="text" id="oSecuencia" placeholder="OP-XXX" readonly style="color:var(--accent);font-family:var(--mono);font-weight:700;cursor:default;">
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top:12px">
+          <label class="form-label">Cliente *</label>
+          <input type="text" id="oCliente" placeholder="Nombre del cliente o empresa">
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Descripción *</label>
+          <textarea id="oDescripcion" placeholder="Ej: Resistencia incubadora Binder modelo BD56" rows="2"></textarea>
+        </div>
+
+        <div class="row2">
+          <div class="form-row" style="margin:0">
+            <label class="form-label">Valor estimado $</label>
+            <input type="number" id="oValor" placeholder="0" min="0">
+          </div>
+          <div class="form-row" style="margin:0">
+            <label class="form-label">Fecha cierre esperada</label>
+            <input type="date" id="oFechaCierre">
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top:12px">
+          <label class="form-label">Observaciones</label>
+          <textarea id="oObs" placeholder="Notas, contacto, próximos pasos..." rows="2"></textarea>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Chat ID (para notificación Telegram)</label>
+          <input type="text" id="oChatId" placeholder="Ej: 123456789">
+        </div>
+
+        <button class="btn btn-purple" onclick="enviarOportunidad()">📈 Registrar oportunidad</button>
+      </div>
+    </div>
+
+    <div class="section sec-gap" id="oListSection" style="display:none">
+      <div class="section-title">Esta sesión <span class="tag tag-purple" id="oCount">0</span></div>
+      <div id="oList"></div>
+    </div>
+  </div>
+
+</div><!-- /.app -->
+
+<!-- ── MODAL REPORTE ── -->
+<div class="modal-overlay" id="modalConfirm">
+  <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">Confirmar envío</div>
     <div id="modalBody" style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:18px"></div>
@@ -22,7 +440,7 @@
 //  CONFIGURACIÓN — Reemplaza con tus URLs reales de Apps Script
 // ═══════════════════════════════════════════════════════════════
 const URL_REPORTES       = 'https://script.google.com/macros/s/AKfycbyoNHW8AiYYrCA4NG0chAcdEpypAUXFVbAPyjZv6AYlmUONWdjzT2nuFHecg-_aohzw/exec';
-const URL_LUNA           = 'https://script.google.com/macros/s/AKfycbyK66JuuTIOjugwIQWfWNQFerRL1iNULFTWNsy_KBE_CuhCxhlNuH4ffLVaIskI4fKl/exec';  // ← tu Apps Script de recordatorios/oportunidades
+const URL_LUNA           = 'PON_AQUI_LA_URL_DE_LUNA_LITE';  // ← tu Apps Script de recordatorios/oportunidades
 
 // ═══════════════════════════════════════════════════════════════
 //  STATE
