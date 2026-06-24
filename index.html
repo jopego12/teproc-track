@@ -416,7 +416,11 @@
 
         <div class="form-row">
           <label class="form-label">Chat ID (para notificación Telegram)</label>
-          <input type="text" id="oChatId" placeholder="Ej: 123456789">
+          <label class="form-label">Responsable</label>
+<select id="oChatId">
+  <option value="JP">JP - Jhonatan</option>
+  <option value="MA">MA - Manuel</option>
+</select>
         </div>
 
         <button class="btn btn-purple" onclick="enviarOportunidad()">📈 Registrar oportunidad</button>
@@ -456,7 +460,7 @@
 // ═══════════════════════════════════════════════════════════════
 //  CONFIGURACIÓN — Reemplaza con tus URLs reales de Apps Script
 // ═══════════════════════════════════════════════════════════════
-const URL_REPORTES       = 'https://script.google.com/macros/s/AKfycbyoNHW8AiYYrCA4NG0chAcdEpypAUXFVbAPyjZv6AYlmUONWdjzT2nuFHecg-_aohzw/exec';
+
 const URL_LUNA           = 'https://script.google.com/macros/s/AKfycbwPRUqnusMLuOKF8fDfkHVwXJa9kHUHCuMjEZY5Bm2h80UEVmGpAK1yeHY8D2Z9QGPN/exec';  // ← tu Apps Script de recordatorios/oportunidades
 
 // ═══════════════════════════════════════════════════════════════
