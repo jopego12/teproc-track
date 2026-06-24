@@ -440,7 +440,7 @@
 //  CONFIGURACIÓN — Reemplaza con tus URLs reales de Apps Script
 // ═══════════════════════════════════════════════════════════════
 const URL_REPORTES       = 'https://script.google.com/macros/s/AKfycbyoNHW8AiYYrCA4NG0chAcdEpypAUXFVbAPyjZv6AYlmUONWdjzT2nuFHecg-_aohzw/exec';
-const URL_LUNA           = 'https://script.google.com/macros/s/AKfycbwPRUqnusMLuOKF8fDfkHVwXJa9kHUHCuMjEZY5Bm2h80UEVmGpAK1yeHY8D2Z9QGPN/exec';  // ← tu Apps Script de recordatorios/oportunidades
+const URL_LUNA           = 'https://script.google.com/macros/s/AKfycbyK66JuuTIOjugwIQWfWNQFerRL1iNULFTWNsy_KBE_CuhCxhlNuH4ffLVaIskI4fKl/exec';  // ← tu Apps Script de recordatorios/oportunidades
 
 // ═══════════════════════════════════════════════════════════════
 //  STATE
@@ -703,7 +703,15 @@ async function confirmSend(){
     else v.equipos.forEach(e=>payload.push({...base,equipo:e.nombre,min_servicio:e.minServ,costo_repuestos:e.costoRep,repuestos:e.repuestos,observaciones:e.obs}));
   });
   try{
-    await fetch(URL_REPORTES,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'application/json'},mode:'no-cors'});
+    await fetch(URL_LUNA,{
+  method:'POST',
+  body: JSON.stringify({
+    accion: "reporte",
+    filas: payload
+  }),
+  headers:{'Content-Type':'application/json'},
+  mode:'no-cors'
+});
     showSuccess('¡ENVIADO!',`${payload.length} registro${payload.length!==1?'s':''} enviados a Google Sheets.`,'resetAll');
   } catch(err){ alert('Error de conexión. Verifica tu internet.'); }
 }
