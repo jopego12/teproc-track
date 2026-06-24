@@ -1,4 +1,4 @@
-const CACHE_NAME = "teproc-track-v2";
+const CACHE_NAME = "techtrack-v20260624";
 
 self.addEventListener("install", e => {
   e.waitUntil(
